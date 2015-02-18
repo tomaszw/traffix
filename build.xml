@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<project name="trafficls" default="build">
+  <property name="version" value="0.1"/>
+  <property name="backup-dir" location="e:/backup/trafficls"/>
+  <property name="build-output-dir" location="bin"/>
+  <property name="dist-dir" location="dist"/>
+  <property name="javac-classpath" value="lib/aspectjrt.jar;lib/swt.jar;lib/jface.jar;lib/runtime.jar;lib/osgi.jar;lib/lattice-layout.jar;lib/junit.jar;lib/jmf.jar;../org.tw/lib/jogl.jar"/>
+  <property name="manifest-classpath" value="lib/aspectjrt.jar lib/swt.jar lib/jface.jar lib/runtime.jar lib/osgi.jar lib/lattice-layout.jar lib/jmf.jar lib/retroweaver.jar"/>
+  <property name="retrodir" location="f:/libs/retroweaver"/>
+  <property name="jdk15dir" location="f:/progr/j2sdk-1.5.0"/>
+
+  <target name="backup-sources">
+    <tstamp/>
+    <mkdir dir="${backup-dir}"/>
+    <jar jarfile="${backup-dir}/trafficls-src-${version}-${DSTAMP}.jar" basedir="src"/>
+  </target>
+
+  <target name="remote-backup-sources" depends="backup-sources">
+    <tstamp/>
+    <ftp remotedir="backup" action="send" userid="alva" password="a1l2v3a4" server="192.168.1.1">
+	  <fileset dir="${backup-dir}">
+	    <filename name="trafficls-src-${version}-${DSTAMP}.jar"/>
+	  </fileset>      
+    </ftp>
+  </target>
+	
+  <target name="compile">
+    <tstamp/>
+    <mkdir dir="${build-output-dir}"/>
+    <javac srcdir="../org.tw/src" source="1.5" destdir="${build-output-dir}"
+      classpath="${javac-classpath}"/>
+    <javac srcdir="src" source="1.5" destdir="${build-output-dir}"
+      classpath="${javac-classpath}"/>
+  </target>
+
+  <target name="retroweave" depends="compile">
+    <exec executable="d:/aplikacje/retroweaver/retro.bat">
+      <arg line="bin"/>
+    </exec>
+  </target>
+
+  <target name="build" depends="compile">
+    <buildnumber/>
+    <jar jarfile="trafficls.jar" basedir="${build-output-dir}">
+      <manifest>
+        <attribute name="Main-Class" value="traffix.Traffix"/>
+        <attribute name="Class-Path" value="${manifest-classpath}"/><!-- value="lib/swt.jar lib/jface.jar lib/runtime.jar lib/osgi.jar lib/lattice-layout.jar"/> -->
+      </manifest>
+    </jar>
+    <mkdir dir="${dist-dir}"/>
+    <zip basedir="." destfile="${dist-dir}/trafficls-${version}-build${build.number}.zip"
+      includes="icons/**,cursors/**,trafficls.jar,traffix.bat,parametry_ruchu.txt"/>
+  </target>
+
+  <target name="clean">
+    <delete dir="${build-output-dir}"/>
+    <delete file="trafficls.jar"/>
+  </target>
+</project>
